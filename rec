@@ -1,0 +1,31 @@
+import os
+import re
+
+def recursive_grep(directory, search_pattern):
+    """Recursively search for file names matching a pattern in a directory and its subdirectories"""
+    file_names = []
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            with open(os.path.join(root, file), 'r') as f:
+                contents = f.read()
+                matches = re.findall(search_pattern, contents)
+                for match in matches:
+                    file_names.append(match)
+    return file_names
+
+import os
+
+def recursive_grep_filenames(directory, extension):
+    filenames = set()
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            if file.endswith(extension):
+                filenames.add(os.path.join(root, file))
+            elif os.path.splitext(file)[1] == '':
+                # If file has no extension, try to read it as a directory
+                filenames |= recursive_grep_filenames(os.path.join(root, file), extension)
+    return filenames
+
+# Example usage
+filenames = recursive_grep_filenames('/path/to/directory', '.sh')
+print(filenames)

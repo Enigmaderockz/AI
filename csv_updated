@@ -1,0 +1,78 @@
+import csv
+from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill
+
+
+def compare_csv_files(file1, file2):
+  with open(file1, 'r') as f1, open(file2, 'r') as f2:
+    reader1 = csv.reader(f1)
+    reader2 = csv.reader(f2)
+    header1 = next(reader1)
+    header2 = next(reader2)
+
+    # Check if the headers match
+    if header1 != header2:
+      print("Error: Headers do not match")
+      return None
+
+    # Read the contents of both files into lists
+    rows1 = [row for row in reader1]
+    rows2 = [row for row in reader2]
+
+    # Create an Excel workbook and two sheets
+    wb = Workbook()
+    summary_sheet = wb.active
+    summary_sheet.title = "Summary"
+    rows_sheet = wb.create_sheet(title="Different Rows")
+
+    # Write headers to the different rows sheet
+    rows_sheet.append(header1)
+
+    # Compare each row of the CSV files
+    num_records = 0
+    num_diff_records = 0
+    for row1 in rows1:
+      num_records += 1
+      row_found = False
+      for row2 in rows2:
+        if row1 == row2:
+          row_found = True
+          break
+      if not row_found:
+        num_diff_records += 1
+        # Write the different row to the rows sheet
+        rows_sheet.append(row1 + [file1])
+        for i in range(len(header1)):
+          rows_sheet.cell(rows_sheet.max_row,
+                          i + 1).fill = PatternFill(start_color='FFFF0000',
+                                                    end_color='FFFF0000',
+                                                    fill_type='solid')
+
+    for row2 in rows2:
+      num_records += 1
+      row_found = False
+      for row1 in rows1:
+        if row1 == row2:
+          row_found = True
+          break
+      if not row_found:
+        num_diff_records += 1
+        # Write the different row to the rows sheet
+        rows_sheet.append(row2 + [file2])
+        for i in range(len(header1)):
+          rows_sheet.cell(rows_sheet.max_row,
+                          i + 1).fill = PatternFill(start_color='FFFF0000',
+                                                    end_color='FFFF0000',
+                                                    fill_type='solid')
+
+    # Write the summary to the summary sheet
+    summary_sheet['A1'] = "Total Records"
+    summary_sheet['B1'] = num_records/2
+    summary_sheet['A2'] = "Records with Differences"
+    summary_sheet['B2'] = num_diff_records/2
+
+    # Save the workbook to a file
+    wb.save("output.xlsx")
+
+
+compare_csv_files("a.csv", "b.csv")

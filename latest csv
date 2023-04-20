@@ -1,0 +1,80 @@
+import pandas as pd
+import openpyxl
+from openpyxl.styles import Font, PatternFill
+
+
+def compare_csv_files(file1_path, file2_path, output_path):
+  df1 = pd.read_csv(file1_path)
+  df2 = pd.read_csv(file2_path)
+
+  # sort the dataframes by all columns
+  df1 = df1.sort_values(by=list(df1.columns))
+  df2 = df2.sort_values(by=list(df2.columns))
+
+  # ignore the column headers
+  df1_values = df1.to_numpy()
+  df2_values = df2.to_numpy()
+
+  # compare the two dataframes
+  comparison = df1_values == df2_values
+  rows, cols = comparison.shape
+
+  # count the differences
+  count_diff = (comparison == False).sum()
+  count_total = rows
+
+  # create a new workbook with two worksheets
+  workbook = openpyxl.Workbook()
+  summary_ws = workbook.active
+  summary_ws.title = "Summary"
+  detail_ws = workbook.create_sheet(title="Detail")
+
+  # add headers to the summary worksheet
+  summary_ws.append(["Total Records", "Records with Differences"])
+  summary_ws.append([count_total, count_diff])
+
+  # add headers to the detail worksheet
+  detail_ws.append(list(df1.columns) + ["File"])
+
+  # compare the two dataframes row by row
+  for i in range(rows):
+    row = comparison[i]
+    if False in row:
+        # add the row to the detail worksheet with the file name
+        file1_row = df1.iloc[i]
+        file2_row = df2.iloc[i]
+        detail_ws.append(list(file1_row) + ["file1.csv"])
+        detail_ws.append(list(file2_row) + ["file2.csv"])
+
+        # highlight the cells with differences in red
+        for j, value in enumerate(row):
+            if not value:
+                # highlight cells with differences from both rows
+                cell1 = detail_ws.cell(row=detail_ws.max_row - 1, column=j + 1)
+                cell2 = detail_ws.cell(row=detail_ws.max_row, column=j + 1)
+                cell1.fill = PatternFill(start_color="FFFF0000",
+                                          end_color="FFFF0000",
+                                          fill_type="solid")
+                cell2.fill = PatternFill(start_color="FFFF0000",
+                                          end_color="FFFF0000",
+                                          fill_type="solid")
+
+
+  # set column widths in the detail worksheet
+  for col in detail_ws.columns:
+    max_length = 0
+    column = col[0].column_letter
+    for cell in col:
+      try:
+        if len(str(cell.value)) > max_length:
+          max_length = len(str(cell.value))
+      except:
+        pass
+    adjusted_width = (max_length + 2)
+    detail_ws.column_dimensions[column].width = adjusted_width
+
+  # save the workbook
+  workbook.save(output_path)
+
+
+compare_csv_files("file1.csv", "file2.csv", "output.xlsx")

@@ -65,7 +65,7 @@ def compare_csv_files(file1, file2):
                 else:
                     outfile.write('<td>{}</td>'.format(val))
 
-            outfile.write('</tr>\n>')
+            outfile.write('</tr>\n')
 
             outfile.write('<tr>')
             outfile.write('<td>{}</td>'.format(file2))
@@ -77,14 +77,16 @@ def compare_csv_files(file1, file2):
                     outfile.write('<td style="background-color: #ffb3b3; font-weight: bold;">{}</td>'.format(val))
                 else:
                     outfile.write('<td>{}</td>'.format(val))
-            outfile.write('</tr>\n>')
+            outfile.write('</tr>\n')
 
         # Close the HTML table
-        outfile.write('</table>\n>')
+        outfile.write('</table>\n')
 
         # Write the summary to the summary sheet
         outfile.write('<div style="font-family: Arial, sans-serif; margin-top: 20px;">\n')
-        outfile.write('<h2>Comparison Summary</h2>')
+        outfile.write('<table style="font-family: Arial, sans-serif; border-collapse: collapse; width: 100%;">\n')
+        outfile.write('<tr style="background-color: #ddd;"><th colspan="{}">Comaprison Summary</th></tr>')
+        outfile.write('<table style="font-family: Arial, sans-serif; border-collapse: collapse; width: 100%;">\n')
         outfile.write('<p>Total Records in each file: {}</p>'.format(num_records))
         outfile.write('<p>Records with Differences: {} ({:.2f}%)</p>'.format(num_diff_records, (num_diff_records) / num_records * 100))
         outfile.write('</div>')

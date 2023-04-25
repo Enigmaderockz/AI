@@ -1,0 +1,31 @@
+import openai
+
+# Set up the OpenAI API credentials
+openai.api_key = "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"
+
+# Define the requirement for which test cases are to be generated
+requirement = """
+By redesigning a website, our company aims to achieve the following goals:
+
+Launch 3 ad campaigns to promote a redesigned eCommerce website within a month.
+Gain min 100,000 unique visitors to the website by the end of Q4 2021.
+Increase average time on website from 1.2 minutes to 3 minutes by the end of Q4 2021.
+Decrease cart abandonment by 40 percent by the end of Q4 2021
+"""
+
+# Define the prompt for the OpenAI API
+prompt = f"Generate test cases for the following requirement:\n\n{requirement}\n\nTest Cases:"
+
+# Call the OpenAI API to generate test cases
+response = openai.Completion.create(
+    engine="text-davinci-002",
+    prompt=prompt,
+    max_tokens=1024,
+    n=1,
+    stop=None,
+    temperature=0.7,
+)
+
+# Print the generated test cases
+print("Generated Test Cases:")
+print(response.choices[0].text.strip())

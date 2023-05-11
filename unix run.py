@@ -10,8 +10,8 @@ script_path = os.path.join(current_directory, 'script.sh')
 # Make sure the script has execute permissions
 subprocess.run(['chmod', '+x', script_path])
 
-# Execute the shell script
-result = subprocess.run([script_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+# Execute the shell script with the dot command
+result = subprocess.run(['. ' + script_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True)
 
 # Check if the script executed successfully
 if result.returncode == 0:

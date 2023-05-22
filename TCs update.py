@@ -48,3 +48,24 @@ def read_excel_file(file_path):
 
 excel_file_path = 'your_excel_file_path.xlsx'
 id_number_map = read_excel_file(excel_file_path)
+
+
+import pytest
+from your_csv_reader_module import id_number_map
+
+def pytest_html_report_title(report):
+    report.title = "Modified Scenario Names Report"
+
+@pytest.hookimpl(tryfirst=True, hookwrapper=True)
+def pytest_runtest_makereport(item, call):
+    outcome = yield
+    report = outcome.get_result()
+
+    if report.when == "call":
+        scenario_name = item.name
+        for ID, numbers in id_number_map.items():
+            if ID in scenario_name:
+                formatted_numbers = ','.join(numbers)
+                report.nodeid = report.nodeid.replace(ID, formatted_numbers)
+                break
+

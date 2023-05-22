@@ -29,3 +29,22 @@ def pytest_bdd_before_scenario(request, feature, scenario):
 
     # Execute the hook
     outcome = yield
+
+    import openpyxl
+
+def read_excel_file(file_path):
+    id_number_map = {}
+    workbook = openpyxl.load_workbook(file_path)
+    sheet = workbook.active
+
+    for row in sheet.iter_rows(min_row=2):  # Skip header row
+        number, id = row[0].value, row[1].value
+        if id in id_number_map:
+            id_number_map[id].append(number)
+        else:
+            id_number_map[id] = [number]
+
+    return id_number_map
+
+excel_file_path = 'your_excel_file_path.xlsx'
+id_number_map = read_excel_file(excel_file_path)

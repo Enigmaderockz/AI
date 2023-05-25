@@ -1,0 +1,135 @@
+import csv
+import pandas as pd
+import os
+import concurrent.futures
+
+def read_file(file_path):
+    _, file_extension = os.path.splitext(file_path)
+    if file_extension == ".csv":
+        with open(file_path, "r") as f:
+            reader = csv.DictReader(f)
+            rows = [row for row in reader]
+    elif file_extension == ".xlsx":
+        df = pd.read_excel(file_path)
+        rows = df.to_dict(orient="records")
+    else:
+        raise ValueError("Unsupported file format")
+    return rows
+
+def compare_rows(row1, row2, diff_rows):
+    row_diff = False
+    diff_cols = []
+
+    for col, val1 in row1.items():
+        val2 = row2[col]
+        if val1 != val2:
+            try:
+                if str(val1) == str(val2):
+                    continue
+            except ValueError:
+                pass
+            row_diff = True
+            diff_cols.append(col)
+
+    if row_diff:
+        diff_rows.append((diff_cols, row1, row2))
+
+def compare_csv_files(file1: str, file2: str, outfile: str):
+    # Initialize counters
+    num_records = 0
+    num_diff_records = 0
+    num_blank_diff_records = 0
+
+    # Open the input files and output file for writing HTML table
+    with open(outfile, "w") as outfile:
+        rows1 = read_file(file1)
+        rows2 = read_file(file2)
+
+        header1 = list(rows1[0].keys())
+        header2 = list(rows2[0].keys())
+
+        # Check if both files have the same headers/fieldnames
+        if header1 != header2:
+            raise ValueError("Headers not matching in both files")
+
+        # Check if both files have the same number of records
+        if len(rows1) != len(rows2):
+            raise ValueError("Number of rows not matching in both files")
+
+        # Sort the rows of both files by their values to handle different ordering
+        sorted_rows1 = sorted(rows1, key=lambda row: tuple(row.values()))
+        sorted_rows2 = sorted(rows2, key=lambda row: tuple(row.values()))
+
+        # Create an empty list to hold rows with differences
+        diff_rows = []
+
+        # Compare each row from both files and add different rows to diff_rows list
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            futures = []
+            for row_num, (row1, row2) in enumerate(zip(sorted_rows1, sorted_rows2), start=1):
+                num_records += 1
+                futures.append(executor.submit(compare_rows, row1, row2, diff_rows))
+
+            # Wait for all the comparison tasks to complete
+            concurrent.futures.wait(futures)
+
+        # Create an empty string to hold the entire HTML contents
+        html = ""
+
+        # Write the comparison summary to the output file
+        summary_html = '<div style="font-family: Helvetica, sans-serif; margin-top: 20px;">\n'
+        summary_html += '<tr style="background-color: #92b9bf; border: 1px solid black;"><th colspan="100" style="border: 1px solid black;">Comparison Summary:-</th></tr>'
+        summary_html += f"<p>Total Records in each file: {num_records}</p>"
+        summary_html += f"<p>Number of Rows with Differences: {int(num_diff_records)}</p>"
+        summary_html += "</div>\n"
+
+        # Add the summary HTML to the start of the HTML string
+        html += summary_html
+
+        # Check if there are any differences in the data and generate HTML table for differences
+        if len(diff_rows) > 0:
+            # Write the HTML table for differences to the output file
+            html += '<table style="font-family: Helvetica, sans-serif; font-size:14px;border-collapse: collapse; width: 100%; border: 1px solid black; border-spacing: 0px;">\n'
+            html += '<tr style="background-color: #a0d1dd; border: 1px solid black;"><th colspan="100" style="border: 1px solid black;">Differences</th></tr>'
+            html += '<tr style="background-color: #a0d1dd; border: 1px solid black;"><th style="border: 1px solid black;">File</th><th style="border: 1px solid black;">Row Number</th>'
+
+            # Write the headers of CSV files
+            for col in header1:
+                html += f'<th style="border: 1px solid black;">{col}</th>'
+
+            html += "</tr>\n"
+
+            # Write the rows with differences to the HTML file
+            for diff_row in diff_rows:
+                html += '<tr style="border: 1px solid black;">'
+                html += f'<td style="border: 1px solid black;">{file1}</td>'
+                html += f'<td style="border: 1px solid black;">{diff_row[0]}</td>'
+
+                # Write the values of each column of the row
+                for col, val in diff_row[1].items():
+                    if col in diff_row[0]:
+                        html += f'<td style="border: 1px solid black; background-color: #ffcfbf;font-weight: bold;">{val}</td>'
+                    else:
+                        html += f'<td style="border: 1px solid black;">{val}</td>'
+
+                html += "</tr>\n"
+
+                html += '<tr style="border: 1px solid black;">'
+                html += f'<td style="border: 1px solid black;">{file2}</td>'
+                html += f'<td style="border: 1px solid black;">{diff_row[0]}</td>'
+
+                # Write the values of each column of the row
+                for col, val in diff_row[2].items():
+                    if col in diff_row[0]:
+                        html += f'<td style="border: 1px solid black; background-color: #ffcfbf;font-weight: bold;">{val}</td>'
+                    else:
+                        html += f'<td style="border: 1px solid black;">{val}</td>'
+                html += "</tr>\n"
+
+            # Close the HTML table
+            html += "</table>\n"
+
+        # Write the contents of the entire HTML string to the output file
+        outfile.write(html)
+
+compare_csv_files("file1.csv", "file2.csv", "output.html")

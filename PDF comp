@@ -1,32 +1,27 @@
-from PIL import Image
-import cv2
+import PyPDF2
 
-# Convert PDFs to images
-pdf1 = Image.open('pdf1.pdf')
-pdf2 = Image.open('pdf2.pdf')
-pdf1.save('pdf1.png', 'png')
-pdf2.save('pdf2.png', 'png')
+def extract_text_from_pdf(file_path):
+    pdf_file = open(file_path, 'rb')
+    pdf_reader = PyPDF2.PdfFileReader(pdf_file)
+    text = ""
 
-# Load images and convert to grayscale
-img1 = cv2.imread('pdf1.png', cv2.IMREAD_GRAYSCALE)
-img2 = cv2.imread('pdf2.png', cv2.IMREAD_GRAYSCALE)
+    for page_num in range(pdf_reader.numPages):
+        page = pdf_reader.getPage(page_num)
+        text += page.extractText()
 
-# Compute the absolute difference between the images
-diff = cv2.absdiff(img1, img2)
+    pdf_file.close()
+    return text
 
-# Threshold the difference image
-thresh = cv2.threshold(diff, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
+def compare_pdfs(file_path1, file_path2):
+    text1 = extract_text_from_pdf(file_path1)
+    text2 = extract_text_from_pdf(file_path2)
 
-# Find contours in the thresholded image
-contours, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    if text1 == text2:
+        print("The PDF files are identical.")
+    else:
+        print("The PDF files are different.")
 
-# Draw rectangles around the contours
-for contour in contours:
-    (x, y, w, h) = cv2.boundingRect(contour)
-    cv2.rectangle(img1, (x, y), (x + w, y + h), (0, 0, 255), 2)
-    cv2.rectangle(img2, (x, y), (x + w, y + h), (0, 0, 255), 2)
-
-# Display the images with the contours
-cv2.imshow('pdf1', img1)
-cv2.imshow('pdf2', img2)
-cv2.waitKey(0)
+if __name__ == "__main__":
+    pdf_file1 = "path/to/your/first_pdf_file.pdf"
+    pdf_file2 = "path/to/your/second_pdf_file.pdf"
+    compare_pdfs(pdf_file1, pdf_file2)

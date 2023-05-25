@@ -28,19 +28,23 @@ def compare_csv_files(file1, file2, outfile):
         header1 = list(rows1[0].keys())
         header2 = list(rows2[0].keys())
 
-        # Check if both files have same headers/fieldnames
+        # Check if both files have the same headers/fieldnames
         if header1 != header2:
             raise ValueError("Headers not matching in both files")
 
-        # Check if both files have same number of records
+        # Check if both files have the same number of records
         if len(rows1) != len(rows2):
             raise ValueError("Number of rows not matching in both files")
+
+        # Sort the rows based on their values
+        sorted_rows1 = sorted(rows1, key=lambda row: tuple(row.values()))
+        sorted_rows2 = sorted(rows2, key=lambda row: tuple(row.values()))
 
         # Create an empty list to hold the rows with differences
         diff_rows = []
 
         # Check if there are any differences in the data
-        for row_num, (row1, row2) in enumerate(zip(rows1, rows2), start=1):
+        for row_num, (row1, row2) in enumerate(zip(sorted_rows1, sorted_rows2), start=1):
             num_records += 1
             row_diff = False
             diff_cols = []

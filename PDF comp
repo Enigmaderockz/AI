@@ -96,4 +96,17 @@ if __name__ == "__main__":
     pdf_file2 = "path/to/your/second_pdf_file.pdf"
     compare_pdfs(pdf_file1, pdf_file2)
 
+#to modify the width
+
+def print_differences(file_path1, text1, file_path2, text2):
+    text1_lines = text1.splitlines()
+    text2_lines = text2.splitlines()
+
+    diff = difflib.HtmlDiff(wrapcolumn=80)  # Adjust the wrapcolumn value to control the width of the columns
+    html_diff = diff.make_file(text1_lines, text2_lines, fromdesc=os.path.basename(file_path1), todesc=os.path.basename(file_path2), context=True, numlines=3)
+
+    with open("differences.html", "w", encoding='utf-8') as f:
+        f.write(html_diff)
+
+    print("Differences saved to differences.html")
 

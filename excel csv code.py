@@ -44,3 +44,45 @@ def compare_files(file1: str, file2: str, outfile: str):
 
 compare_files("file1.csv", "file2.csv", "output.html")
 compare_files("file1.xlsx", "file2.xlsx", "output.html")
+              
+
+ import csv
+
+def compare_csv_files(file1: str, file2: str, outfile: str):
+    # ... (the of the code remains the same until the end of the for loop that writes the rows with differences)
+
+            # Close the HTML table
+            html += "</table>\n"
+
+            # Add the "Load More" functionality
+            load_more_js = '''
+            <script>
+                function loadMore() {
+                    var hiddenRows = document.querySelectorAll(".hidden-row");
+                    var loadMoreButton = document.getElementById("load-more-button");
+                    var rowsToShow = 100;
+                    var rowsShown = 0;
+
+                    for (var i = 0; i < hiddenRows.length && rowsShown < rowsToShow; i++) {
+                        hiddenRows[i].classList.remove("hidden-row");
+                        rowsShown += 1;
+                    }
+
+                    if (hiddenRows.length <= rowsToShow) {
+                        loadMoreButton.style.display = "none";
+                    }
+                }
+            </script>
+            '''
+
+            load_more_button = '''
+            <button id="load-more-button" onclick="loadMore()" style="font-family: Helvetica, sans-serif; font-size: 14px; margin-top: 20px;">Load More</button>
+            '''
+
+            html += load_more_js + load_more_button
+
+        # Write the contents of the entire HTML string to the output file
+        outfile.write(html)
+
+compare_csv_files("file1.csv", "file2.csv", "output.html")
+

@@ -1,0 +1,32 @@
+from PIL import Image
+import cv2
+
+# Convert PDFs to images
+pdf1 = Image.open('pdf1.pdf')
+pdf2 = Image.open('pdf2.pdf')
+pdf1.save('pdf1.png', 'png')
+pdf2.save('pdf2.png', 'png')
+
+# Load images and convert to grayscale
+img1 = cv2.imread('pdf1.png', cv2.IMREAD_GRAYSCALE)
+img2 = cv2.imread('pdf2.png', cv2.IMREAD_GRAYSCALE)
+
+# Compute the absolute difference between the images
+diff = cv2.absdiff(img1, img2)
+
+# Threshold the difference image
+thresh = cv2.threshold(diff, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
+
+# Find contours in the thresholded image
+contours, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+# Draw rectangles around the contours
+for contour in contours:
+    (x, y, w, h) = cv2.boundingRect(contour)
+    cv2.rectangle(img1, (x, y), (x + w, y + h), (0, 0, 255), 2)
+    cv2.rectangle(img2, (x, y), (x + w, y + h), (0, 0, 255), 2)
+
+# Display the images with the contours
+cv2.imshow('pdf1', img1)
+cv2.imshow('pdf2', img2)
+cv2.waitKey(0)

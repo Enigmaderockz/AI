@@ -92,3 +92,55 @@ if __name__ == "__main__":
     pdf_file2 = "path/to/your/second_pdf_file.pdf"
     compare_pdfs(pdf_file1, pdf_file2)
 
+# one more
+
+import PyPDF2
+import difflib
+import os
+import html
+
+def extract_text_from_pdf(file_path):
+    pdf_file = open(file_path, 'rb')
+    pdf_reader = PyPDF2.PdfFileReader(pdf_file)
+    text = ""
+
+    for page_num in range(pdf_reader.numPages):
+        page = pdf_reader.getPage(page_num)
+        text += page.extractText()
+
+    pdf_file.close()
+    return text
+
+def compare_pdfs(file_path1, file_path2):
+    text1 = extract_text_from_pdf(file_path1)
+    text2 = extract_text_from_pdf(file_path2)
+
+    if text1 == text2:
+        print("The PDF files are identical.")
+    else:
+        print("The PDF files are different.")
+        print_differences(file_path1, text1, file_path2, text2)
+
+def print_differences(file_path1, text1, file_path2, text2):
+    text1_lines = text1.splitlines()
+    text2_lines = text2.splitlines()
+
+    diff = difflib.unified_diff(text1_lines, text2_lines, lineterm='')
+
+    with open("differences.html", "w") as f:
+        f.write("<html><head><title>Differences</title></head><body><pre>")
+        for line in diff:
+            if line.startswith('+'):
+                file_name = os.path.basename(file_path2)
+                f.write(f"<span style='color:green;'>{file_name}: {html.escape(line)}</span><br>")
+            elif line.startswith('-'):
+                file_name = os.path.basename(file_path1)
+                f.write(f"<span style='color:red;'>{file_name}: {html.escape(line)}</span><br>")
+        f.write("</pre></body></html>")
+
+    print("Differences saved to differences.html")
+
+if __name__ == "__main__":
+    pdf_file1 = "path/to/your/first_pdf_file.pdf"
+    pdf_file2 = "path/to/your/second_pdf_file.pdf"
+    compare_pdfs(pdf_file1, pdf_file2)

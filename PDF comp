@@ -127,8 +127,8 @@ def print_differences(file_path1, text1, file_path2, text2):
 
     diff = difflib.unified_diff(text1_lines, text2_lines, lineterm='')
 
-    with open("differences.html", "w") as f:
-        f.write("<html><head><title>Differences</title></head><body><pre>")
+    with open("differences.html", "w", encoding='utf-8') as f:
+        f.write("<html><head><meta charset='utf-8'><title>Differences</title></head><body><pre>")
         for line in diff:
             if line.startswith('+'):
                 file_name = os.path.basename(file_path2)
@@ -144,3 +144,4 @@ if __name__ == "__main__":
     pdf_file1 = "path/to/your/first_pdf_file.pdf"
     pdf_file2 = "path/to/your/second_pdf_file.pdf"
     compare_pdfs(pdf_file1, pdf_file2)
+

@@ -85,4 +85,84 @@ def compare_csv_files(file1: str, file2: str, outfile: str):
         outfile.write(html)
 
 compare_csv_files("file1.csv", "file2.csv", "output.html")
+              
+# the best
+              
+              import csv
+import pandas as pd
+import os
+import numpy as np
+
+def read_file(file_path):
+    _, file_extension = os.path.splitext(file_path)
+    if file_extension == ".csv":
+        with open(file_path, "r") as f:
+            reader = csv.DictReader(f)
+            rows = [row for row in reader]
+    elif file_extension == ".xlsx":
+        xls = pd.read_excel(file_path, sheet_name=None)
+        rows = []
+        for sheet_name, df in xls.items():
+            sheet_rows = df.to_dict(orient="records")
+            rows.extend(sheet_rows)
+    else:
+        raise ValueError("Unsupported file format")
+    return rows
+
+def compare_files(file1: str, file2: str, outfile: str):
+    # Read contents of both files into lists
+    rows1 = read_file(file1)
+    rows2 = read_file(file2)
+
+    # Initialize counters
+    num_records = 0
+    num_diff_records = 0
+    num_blank_diff_records = 0
+
+    # Get headers/fieldnames
+    header1 = list(rows1[0].keys())
+    header2 = list(rows2[0].keys())
+
+    # Check if both files have same headers/fieldnames
+    if header1 != header2:
+        raise ValueError("Headers not matching in both files")
+
+    # Check if both files have same number of records
+    if len(rows1) != len(rows2):
+        raise ValueError("Number of rows not matching in both files")
+
+    # Sort the rows of both files by their values to handle different ordering
+    sorted_rows1 = sorted(rows1, key=lambda row: tuple(row.values()))
+    sorted_rows2 = sorted(rows2, key=lambda row: tuple(row.values()))
+
+    # Compare rows
+    for row1, row2 in zip(sorted_rows1, sorted_rows2):
+        num_records += 1
+        diff = False
+        for key in header1:
+            val1 = row1[key]
+            val2 = row2[key]
+
+            # Treat NaN and null values as equal
+            if pd.isna(val1) and pd.isna(val2):
+                continue
+
+            if val1 != val2:
+                diff = True
+                break
+
+        if diff:
+            num_diff_records += 1
+        else:
+            num_blank_diff_records += 1
+
+    # Output the comparison results
+    with open(outfile, "w") as f:
+        f.write(f"Total records: {num_records}\n")
+        f.write(f"Different records: {num_diff_records}\n")
+        f.write(f"Blank different records: {num_blank_diff_records}\n")
+
+# Example usage
+compare_files("file1.xlsx", "file2.xlsx", "output.txt")
+
 

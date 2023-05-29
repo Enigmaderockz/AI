@@ -33,7 +33,7 @@ def read_file(file_path):
             reader = csv.DictReader(f)
             rows = [row for row in reader]
     elif file_extension == ".xlsx":
-        wb = openpyxl.load_workbook(file_path, read_only=True, data_only=True)
+        wb = openpyxl.load_workbook(file_path, data_only=True)
         rows = []
         for sheet_name in wb.sheetnames:
             sheet = wb[sheet_name]
@@ -48,7 +48,7 @@ def read_file(file_path):
                 row_dict = {header[i]: value for i, value in enumerate(row)}
                 sheet_rows.append(row_dict)
             rows.extend(sheet_rows)
+        wb.close()
     else:
         raise ValueError("Unsupported file format")
     return rows
-

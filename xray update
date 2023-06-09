@@ -42,4 +42,27 @@ def get_test_execution_data(JiraID, Result):
         pass
 
     # ... (rest of the code)
+    
+    def get_test_execution_data(JiraID, Result):
+    response_post = ""
+    executed_by = "your_username"  # Replace with the appropriate value
+    started = datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f%z")
+    finished = datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f%z")
+
+    # ... (rest of the code)
+
+    if len(restestid) > 0:
+        restestid = restestid[-1]["id"]
+        current_status = restestid[-1]["status"]["name"]
+        update_url = "http://jiramswm.ms.com/jira/rest/raven/1.0/api/testrun/{0}".format(str(restestid))
+
+        if current_status != Result:
+            response_post = JiraApiCallPost(update_url, Result, executed_by, started, finished)
+        else:
+            response_post = JiraApiCallPost(update_url, current_status, executed_by, started, finished)
+    else:
+        pass
+
+    # ... (rest of the code)
+
 

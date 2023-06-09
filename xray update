@@ -64,5 +64,31 @@ def get_test_execution_data(JiraID, Result):
         pass
 
     # ... (rest of the code)
+    
+    
+    import requests
+import json
+
+# Specify the API endpoint URL
+url = 'http://jiramsum.ms.com/jira/rest/raven/1.0/api/test/TEST_ID/testruns'
+
+# Specify the field values you want to update
+payload = {
+    "field1": "new value",
+    "field2": 12345
+}
+
+# Convert the payload to JSON format
+json_payload = json.dumps(payload)
+
+# Send the PUT request
+response = requests.put(url, data=json_payload, headers={'Content-Type': 'application/json'})
+
+# Check the response status code
+if response.status_code == 200:
+    print('Field(s) updated successfully.')
+else:
+    print('Error occurred. Response:', response.text)
+
 
 

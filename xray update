@@ -1,0 +1,27 @@
+def JiraApiCallPost(apiUrl, executed_by, started, finished):
+
+payload = {
+    "status": Result,
+    "executedBy": executed_by,
+    "startedOn": started,
+    "finishedOn": finished
+}
+headers = {"Content-Type": "application/json"}
+resp = session.put(apiUrl, json=payload, auth=_auth, allow_redirects=True, verify=verify)
+
+def get_test_execution_data(JiraID, Result):
+    response_post = ""
+    executed_by = "your_username"  # Replace with the appropriate value
+    started = datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f%z")
+    finished = datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f%z")
+
+    # ... (rest of the code)
+
+    if len(restestid) > 0:
+        restestid = restestid[-1]["id"]
+        update_url = "http://jiramswm.ms.com/jira/rest/raven/1.0/api/testrun/{0}/status".format(str(restestid))
+        response_post = JiraApiCallPost(update_url, executed_by, started, finished)
+    else:
+        pass
+
+    # ... (rest of the code)

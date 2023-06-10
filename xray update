@@ -81,6 +81,40 @@ payload = {
 # Convert the payload to JSON format
 json_payload = json.dumps(payload)
 
+
+
+import requests
+
+def update_xray_test_run(test_run_id, status, executed_by, jira_url, username, api_token):
+    url = f"{jira_url}/rest/raven/2.0/api/testrun/{test_run_id}"
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Basic {requests.auth._basic_auth_str(username, api_token)}"
+    }
+    data = {
+        "status": status,
+        "executedBy": executed_by
+    }
+    
+    response = requests.put(url, json=data, headers=headers)
+    
+    if response.status_code == 200:
+        print("Test Run updated successfully.")
+    else:
+        print(f"Failed to update Test Run. Status code: {response.status_code}")
+        print(response.text)
+
+# Replace these variables with your own values
+jira_url = "https://your-jira-instance-url"
+username = "your-username"
+api_token = "your-api-token"
+test_run_id = "your-test-run-id"
+status = "PASS"
+executed_by = "your-executed-by-username"
+
+update_xray_test_run(test_run_id, status, executed_by, jira_url, username, api_token)
+
+
 # Send the PUT request
 response = requests.put(url, data=json_payload, headers={'Content-Type': 'application/json'})
 

@@ -1,0 +1,21 @@
+input_file = "input.txt"
+output_file = "output.txt"
+
+with open(input_file, 'r') as file:
+    lines = file.readlines()
+
+processed_lines = []
+i = 0
+
+while i < len(lines):
+    query = lines[i].strip()
+    i += 1
+
+    if i < len(lines):
+        data = lines[i].strip()
+        i += 1
+
+        processed_lines.append(f"{query} -- {data}")
+
+with open(output_file, 'w') as file:
+    file.write('\n'.join(processed_lines))

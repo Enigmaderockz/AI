@@ -2,7 +2,7 @@ import pandas as pd
 import random
 import string
 from datetime import datetime, timedelta
-import csv
+
 
 # Lists of first and last names for masking
 first_names = ["Emma", "Liam", "Olivia", "Noah", "Ava", "Sophia", "Isabella", "Mia", "Charlotte", "Amelia",
@@ -61,14 +61,14 @@ def mask_account_number(
             first_name = random.choice(first_names)
             last_name = random.choice(last_names)
             masked_number = f"{first_name}{separator}{last_name}"
-        elif column_name == "ACCT": # This is for those columns which should have fixed characters
+        elif column_name == "ACCT": # For generating masked in the columns should have fixed characters
             if len(account_number) == length:
                 masked_number = "".join(
                     random.choices(string.ascii_uppercase + string.digits, k=length)
                 )
             else:
                 masked_number = account_number
-        else:
+        else:                         # For generating masked data of any unspecified columns above of VARCHAR type
             masked_number = "".join(
                     random.choices(string.ascii_uppercase + string.digits, k=length)
                 )
@@ -96,7 +96,8 @@ def mask_csv(input_file, output_file, columns_to_mask):
 
     # Apply masking to each column in columns_to_mask
     for column_name, (data_type, length, extra_params) in columns_to_mask.items():
-        if column_name != "FULL_NAME":  # Skip the FULL_NAME column for now
+        if column_name != "FULL_NAME" and column_name in df.columns:  # Skip FULL_NAME if it doesn't exist  # Skip the FULL_NAME column for now
+            print(f"Masking data in column: {column_name}")
             df[column_name] = df[column_name].apply(
                 lambda x: mask_account_number(
                     column_name, x, data_type, length, extra_params
@@ -104,7 +105,9 @@ def mask_csv(input_file, output_file, columns_to_mask):
             )
 
     # Create the FULL_NAME column by concatenating the masked FIRST_NAME and LAST_NAME columns
-    df["FULL_NAME"] = df["FIRST_NAME"] + " " + df["LAST_NAME"]
+    if "FULL_NAME" in df.columns:
+        print("Creating FULL_NAME column")
+        df["FULL_NAME"] = df["FIRST_NAME"] + " " + df["LAST_NAME"]
 
     df.to_csv(output_file, index=False, sep="|")
 

@@ -56,7 +56,7 @@ def mask_csv(input_file, output_file, columns_to_mask):
     for column_name, (data_type, length, extra_params) in columns_to_mask.items():
         df[column_name] = df[column_name].apply(lambda x: mask_account_number(column_name, x, data_type, length, extra_params))
 
-    df.to_csv(output_file, index=False, sep='|', line_terminator='\n')
+    df.to_csv(output_file, index=False, sep='|')
 
 
 if __name__ == "__main__":

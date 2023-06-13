@@ -56,18 +56,22 @@ def mask_account_number(
             masked_number = random.choice(first_names)
         elif column_name == "LAST_NAME":
             masked_number = random.choice(last_names)
-        elif column_name == "ANY_NAME":
+        elif column_name in ["ANY_NAME", "ORG_NAME"]:
             separator = extra_params.get("separator", " ")
             first_name = random.choice(first_names)
             last_name = random.choice(last_names)
             masked_number = f"{first_name}{separator}{last_name}"
-        else:
+        elif column_name == "ACCT": # This is for those columns which should have fixed characters
             if len(account_number) == length:
                 masked_number = "".join(
                     random.choices(string.ascii_uppercase + string.digits, k=length)
                 )
             else:
                 masked_number = account_number
+        else:
+            masked_number = "".join(
+                    random.choices(string.ascii_uppercase + string.digits, k=length)
+                )
     elif data_type.upper() == "DECIMAL":
         precision, scale = length
         masked_number = random_decimal(precision, scale)
@@ -121,7 +125,9 @@ if __name__ == "__main__":
         "FIRST_NAME": ("VARCHAR", 8, None),
         "LAST_NAME": ("VARCHAR", 8, None),
         "ANY_NAME": ("VARCHAR", 16, {"separator": " "}),
+        "ORG_NAME": ("VARCHAR", 206, {"separator": " "}),
         "FULL_NAME": ("VARCHAR", 45, None),
+        "CAL": ("VARCHAR", 45, None),
     }
 
     mask_csv(input_file, output_file, columns_to_mask)
